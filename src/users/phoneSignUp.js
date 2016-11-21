@@ -5,7 +5,7 @@ import VerificationCode from './models/VerificationCode'
 import User from './models/User'
 import credentials from '../../credentials.json'
 
-export default function iosCreateAccount (req, res) {
+export default function phoneSignUp (req, res) {
   const { phone, country, code, name, gender, password } = req.body
   let { birthday } = req.body
 
@@ -59,15 +59,16 @@ export default function iosCreateAccount (req, res) {
       }
       const user = new User(userObject)
 
-      return user.save().then(() => {
+      return user.save().then((user) => {
         delete userObject.phoneNumber
         delete userObject.password
+        userObject._id = user._id
         return userObject
       })
     })
     .then((userObject) => {
       // TODO: use promise
-      jwt.sign({ phoneNumber }, credentials.jwtKey, { expiresIn: '15d' }, (err, token) => {
+      jwt.sign({ _id: userObject._id }, credentials.jwtKey, { expiresIn: '15d' }, (err, token) => {
         if (err) {
           throw err
         }
