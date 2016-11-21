@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken'
 import errorFactory from '../utils/errorFactory'
 import bcrypt from '../utils/bcrypt'
-import getBioFromFBAccessToken from '../utils/getBioFromFBAccessToken'
 import VerificationCode from './models/VerificationCode'
 import User from './models/User'
 import credentials from '../../credentials.json'
