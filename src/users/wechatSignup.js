@@ -1,15 +1,14 @@
 import jwt from 'jsonwebtoken'
 import errorFactory from '../utils/errorFactory'
-import bcrypt from '../utils/bcrypt'
-import VerificationCode from './models/VerificationCode'
+import getWechatAccessToken from '../utils/getWechatAccessToken'
 import User from './models/User'
 import credentials from '../../credentials.json'
 
-export default function phoneSignUp (req, res) {
-  const { phone, country, code, name, gender, password } = req.body
+export default function wechatSignup (req, res) {
+  const { code, name, gender } = req.body
   let { birthday } = req.body
 
-  if (!phone || !country || !code || !name || !birthday || !gender) {
+  if (!code || !name || !birthday || !gender) {
     res.status(400).json({ message: 'Insufficient parameters' })
     return
   }
@@ -20,39 +19,19 @@ export default function phoneSignUp (req, res) {
     return
   }
 
-  if (password.length < 6) {
-    res.status(400).json({ message: 'Password is too short'})
-    return
-  }
-
-  const phoneNumber = `+${country}${phone}`
-
-  User.findOne({ phoneNumber })
-    .then((user) => {
-      if (user) {
-        throw errorFactory(403, 'Phone number already in use')
-      }
-      return VerificationCode.findOne({ phoneNumber })
+  let userObject = {}
+  getWechatAccessToken(code)
+    .then((result) => {
+      return User.findOne({ wechatID: result.openid }).then((user) => {
+        if (user) {
+          throw errorFactory(403, 'WechatID already in use');
+        }
+        return result
+      })
     })
-    .then(({ code, createAt }) => {
-      if (code !== code) {
-        throw errorFactory(403, 'Invalid code')
-      }
-
-      const now = new Date().getTime()
-      // Code expires after 11 minutes
-      if (now - createAt > 660000) {
-        throw errorFactory(403, 'Code has expired')
-      }
-
-      console.log('code')
-
-      return bcrypt.hash(password)
-    })
-    .then((password) => {
+    .then((result) => {
       let userObject = {
-        phoneNumber,
-        password,
+        wechatID: result.openid,
         name,
         birthday,
         gender
@@ -60,9 +39,9 @@ export default function phoneSignUp (req, res) {
       const user = new User(userObject)
 
       return user.save().then((user) => {
-        delete userObject.phoneNumber
-        delete userObject.password
+        delete userObject.wechatID
         userObject._id = user._id
+        userObject.wechatTokens = result
         return userObject
       })
     })

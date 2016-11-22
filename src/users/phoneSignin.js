@@ -40,7 +40,7 @@ export default function phoneSignin (req, res) {
         if (err) {
           throw err
         }
-        userObject.jwt_token = token
+        userObject.jwtToken = token
         res.status(200).json(userObject)
       })
     })
