@@ -34,8 +34,10 @@ export default function phoneSignUp (req, res) {
       }
       return VerificationCode.findOne({ phoneNumber })
     })
-    .then(({ code, createAt }) => {
-      if (code !== code) {
+    .then((verification) => {
+      const verificationCode = verification.code
+      const createAt = verification.createAt
+      if (code !== verificationCode) {
         throw errorFactory(403, 'Invalid code')
       }
 
