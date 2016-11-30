@@ -2,6 +2,12 @@
 
 ## Preparation
 
+### Install homebrew
+
+	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+### Install node
+
 Install node with
 
     brew install node
@@ -17,6 +23,10 @@ Install n with
 Install latest node with
 
 	sudo n latest
+	
+### Install mongodb
+
+https://docs.mongodb.com/v3.2/tutorial/install-mongodb-on-os-x/
 	
 ## Usage
 
